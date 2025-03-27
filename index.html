@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspertrend - Anonymous Chatroom</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        /* General Styles */
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #74b7bf; 
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: white;
+            margin-top: 20px;
+        }
+        h2{
+            color: white;
+            font-size: 1.0em;
+        }
+        p {
+            color: #fff;
+            font-size: 1.2em;
+        }
+
+        /* Chatbox */
+        #chatContainer {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        #chatMessages {
+            height: 300px;
+            overflow-y: auto;
+            border-bottom: 2px solid #74b7bf;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .message {
+            background: #f1f1f1;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        /* Input */
+        #messageInput {
+            width: 75%;
+            padding: 10px;
+            border: 2px solid #74b7bf;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            background: #ff5e5e;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background: #d14949;
+        }
+
+        /* Username Form */
+        #usernameContainer {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #usernameInput {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #74b7bf;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        /* Panda Image */
+        .panda {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 200px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #chatContainer, #usernameContainer {
+                width: 90%;
+            }
+            .panda {
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 Aspertrend - Anonymous Chatroom</h1>
+    <p>Choose a unique username to start chatting! 💬</p>
+
+    <!-- Username Form -->
+    <div id="usernameContainer">
+        <input type="text" id="usernameInput" placeholder="Enter a unique username..." />
+        <button onclick="setUsername()">Join</button>
+        <p id="usernameError" style="color: red;"></p>
+    </div>
+
+    <!-- Chatbox -->
+    <div id="chatContainer">
+        <div id="chatMessages"></div>
+        <input type="text" id="messageInput" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- Smiling Panda Image -->
+    <img src="panda.png" alt="Smiling Panda" class="panda">
+
+    <script>
+        const socket = io("http://localhost:3000");
+        let username = "";
+
+        function setUsername() {
+            const input = document.getElementById("usernameInput").value.trim();
+            if (input !== "") {
+                socket.emit("checkUsername", input, (isTaken) => {
+                    if (isTaken) {
+                        document.getElementById("usernameError").innerText = "Username is taken! Try another.";
+                    } else {
+                        username = input;
+                        document.getElementById("usernameContainer").style.display = "none";
+                        document.getElementById("chatContainer").style.display = "block";
+                    }
+                });
+            }
+        }
+
+        socket.on("chatUpdate", (messages) => {
+            document.getElementById("chatMessages").innerHTML = messages
+                .map(m => `<div class="message"><strong>${m.username}:</strong> ${m.text}</div>`)
+                .join("");
+        });
+
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            if (input.value.trim() !== "") {
+                socket.emit("newMessage", { username, text: input.value });
+                input.value = "";
+            }
+        }
+    </script>
+<h2>
+Speak your mind, you're as anonymous here as a ninja in the dark... <br> wearing invisibility cloaks... <br> inside a black hole.<br>
+No tracking, no traces, just pure mystery!
+</h2>
+</body>
+</html>
